@@ -39,7 +39,12 @@ class UR10eLiftEnvCfg(LiftEnvCfg):
         #self.events.reset_object_position.params["asset_cfg"] = SceneEntityCfg("object", body_names="ErlenmeyerFlask_01")
 
         self.actions.arm_action = mdp.JointPositionActionCfg(
-            asset_name="robot", joint_names=["shoulder_.*","elbow_joint","wrist_.*"], scale=0.5, use_default_offset=True
+            asset_name="robot", 
+            joint_names=[
+                "shoulder_.*","elbow_joint","wrist_.*"
+            ],
+            scale=0.5,
+            use_default_offset=True
         )
         # robotiq gripper
         self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(

@@ -39,14 +39,24 @@ class UR7eLiftEnvCfg(LiftEnvCfg):
         self.scene.robot = UR7e_with_RG6_Gripper_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         # self.events.joint_friction.params["asset_cfg"].joint_names = ["shoulder_.*", "elbow_.*", "wrist_.*"]
         self.actions.arm_action = mdp.JointPositionActionCfg(
-            asset_name="robot", joint_names=["shoulder_.*","elbow_.*","wrist_.*"], scale=0.5, use_default_offset=True
+            asset_name="robot", 
+            joint_names=[
+                "shoulder_pan_joint",
+                "shoulder_lift_joint",
+                "elbow_joint",
+                "wrist_1_joint",
+                "wrist_2_joint",
+                "wrist_3_joint",
+            ],
+            scale=0.5,
+            use_default_offset=True
         )
         # robotiq gripper
         self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
             joint_names=["finger_joint"],
-            open_command_expr={"finger_joint": 0.0},
-            close_command_expr={"finger_joint": 30.0},
+            open_command_expr={"finger_joint": math.radians(-20.0)},
+            close_command_expr={"finger_joint": math.radians(30.0)},
         )
         self.commands.object_pose.body_name = "onrobot_rg6_base_link"
         # Set Cube as object
@@ -71,12 +81,12 @@ class UR7eLiftEnvCfg(LiftEnvCfg):
         marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
         marker_cfg.prim_path = "/Visuals/FrameTransformer"
         self.scene.ee_frame = FrameTransformerCfg(
-            prim_path="{ENV_REGEX_NS}/Robot/world",
-            debug_vis=False,
+            prim_path="{ENV_REGEX_NS}/Robot/ur7e/world",
+            debug_vis=True,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/onrobot_rg6_model/onrobot_rg6_base_link/",
+                    prim_path="{ENV_REGEX_NS}/Robot/ur7e/wrist_3_link",
                     name="end_effector",
                     offset=OffsetCfg(
                         pos=[0.0, 0.0, 0.1034],

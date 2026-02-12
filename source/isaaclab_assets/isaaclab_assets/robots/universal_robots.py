@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -9,8 +9,7 @@
 The following configuration parameters are available:
 
 * :obj:`UR10_CFG`: The UR10 arm without a gripper.
-* :obj:`UR10E_ROBOTIQ_GRIPPER_CFG`: The UR10E arm with Robotiq_2f_140 gripper.
-* :obj:`UR10e_ROBOTIQ_2F_85_CFG`: The UR10E arm with Robotiq 2F-85 gripper.
+* :obj:`UR10e_ROBOTIQ_GRIPPER_CFG`: The UR10E arm with Robotiq_2f_140 gripper.
 
 Reference: https://github.com/ros-industrial/universal_robot
 """
@@ -35,7 +34,7 @@ UR10_CFG = ArticulationCfg(
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
-            "shoulder_pan_joint": 0.0,
+            "shoulder_pan_joint": -1.712,
             "shoulder_lift_joint": -1.712,
             "elbow_joint": 1.712,
             "wrist_1_joint": 0.0,
@@ -57,17 +56,18 @@ UR10e_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=f"{ISAAC_NUCLEUS_DIR}/Robots/UniversalRobots/ur10e/ur10e.usd",
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
-            disable_gravity=True,
+            disable_gravity=False,
             max_depenetration_velocity=5.0,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-            enabled_self_collisions=False, solver_position_iteration_count=16, solver_velocity_iteration_count=1
+            enabled_self_collisions=True, solver_position_iteration_count=16, solver_velocity_iteration_count=1
         ),
         activate_contact_sensors=False,
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
-            "shoulder_pan_joint": 3.141592653589793,
+            # "shoulder_pan_joint": 3.141592653589793,
+            "shoulder_pan_joint":   0.0,
             "shoulder_lift_joint": -1.5707963267948966,
             "elbow_joint": 1.5707963267948966,
             "wrist_1_joint": -1.5707963267948966,
@@ -126,17 +126,18 @@ UR10_SHORT_SUCTION_CFG.spawn.variants = {"Gripper": "Short_Suction"}
 """Configuration of UR10 arm with short suction gripper."""
 
 UR10e_ROBOTIQ_GRIPPER_CFG = UR10e_CFG.copy()
-"""Configuration of UR10e arm with Robotiq_2f_140 gripper."""
+UR10e_ROBOTIQ_GRIPPER_CFG.spawn.usd_path = f"{ISAAC_NUCLEUS_DIR}/Samples/Rigging/Manipulator/configure_manipulator/ur10e/ur/ur_gripper.usd"
 UR10e_ROBOTIQ_GRIPPER_CFG.spawn.variants = {"Gripper": "Robotiq_2f_140"}
-UR10e_ROBOTIQ_GRIPPER_CFG.spawn.rigid_props.disable_gravity = True
+UR10e_ROBOTIQ_GRIPPER_CFG.spawn.rigid_props.disable_gravity = False
 UR10e_ROBOTIQ_GRIPPER_CFG.init_state.joint_pos["finger_joint"] = 0.0
 UR10e_ROBOTIQ_GRIPPER_CFG.init_state.joint_pos[".*_inner_finger_joint"] = 0.0
-UR10e_ROBOTIQ_GRIPPER_CFG.init_state.joint_pos[".*_inner_finger_pad_joint"] = 0.0
+# UR10e_ROBOTIQ_GRIPPER_CFG.init_state.joint_pos[".*_inner_finger_pad_joint"] = 0.0
+UR10e_ROBOTIQ_GRIPPER_CFG.init_state.joint_pos[".*_inner_knuckle_joint"] = 0.0
 UR10e_ROBOTIQ_GRIPPER_CFG.init_state.joint_pos[".*_outer_.*_joint"] = 0.0
 # the major actuator joint for gripper
 UR10e_ROBOTIQ_GRIPPER_CFG.actuators["gripper_drive"] = ImplicitActuatorCfg(
     joint_names_expr=["finger_joint"],
-    effort_limit_sim=10.0,
+    effort_limit_sim=20.0,
     velocity_limit_sim=1.0,
     stiffness=11.25,
     damping=0.1,
@@ -144,64 +145,94 @@ UR10e_ROBOTIQ_GRIPPER_CFG.actuators["gripper_drive"] = ImplicitActuatorCfg(
     armature=0.0,
 )
 # the auxiliary actuator joint for gripper
-UR10e_ROBOTIQ_GRIPPER_CFG.actuators["gripper_finger"] = ImplicitActuatorCfg(
-    joint_names_expr=[".*_inner_finger_joint"],
-    effort_limit_sim=1.0,
-    velocity_limit_sim=1.0,
-    stiffness=0.2,
-    damping=0.001,
-    friction=0.0,
-    armature=0.0,
-)
-# the passive joints for gripper
-UR10e_ROBOTIQ_GRIPPER_CFG.actuators["gripper_passive"] = ImplicitActuatorCfg(
-    joint_names_expr=[".*_inner_finger_pad_joint", ".*_outer_finger_joint", "right_outer_knuckle_joint"],
-    effort_limit_sim=1.0,
-    velocity_limit_sim=1.0,
-    stiffness=0.0,
-    damping=0.0,
-    friction=0.0,
-    armature=0.0,
-)
+# UR10e_ROBOTIQ_GRIPPER_CFG.actuators["gripper_finger"] = ImplicitActuatorCfg(
+#     joint_names_expr=[".*_inner_finger_joint"],
+#     effort_limit_sim=1.0,
+#     velocity_limit_sim=1.0,
+#     # stiffness=0.2,
+#     # damping=0.001,
+#     stiffness = 0.0,
+#     damping = 0.0,
+#     friction=0.0,
+#     armature=0.0,
+# )
+# # the passive joints for gripper
+# UR10e_ROBOTIQ_GRIPPER_CFG.actuators["gripper_passive"] = ImplicitActuatorCfg(
+#     joint_names_expr=[".*_inner_knuckle_joint", ".*_outer_.*_joint"],
+#     effort_limit_sim=1.0,
+#     velocity_limit_sim=1.0,
+#     stiffness=0.0,
+#     damping=0.0,
+#     friction=0.0,
+#     armature=0.0,
+# )
 
-
-UR10e_ROBOTIQ_2F_85_CFG = UR10e_CFG.copy()
 """Configuration of UR-10E arm with Robotiq_2f_140 gripper."""
-UR10e_ROBOTIQ_2F_85_CFG.spawn.variants = {"Gripper": "Robotiq_2f_85"}
-UR10e_ROBOTIQ_2F_85_CFG.spawn.rigid_props.disable_gravity = True
-UR10e_ROBOTIQ_2F_85_CFG.init_state.joint_pos["finger_joint"] = 0.0
-UR10e_ROBOTIQ_2F_85_CFG.init_state.joint_pos[".*_inner_finger_joint"] = 0.0
-UR10e_ROBOTIQ_2F_85_CFG.init_state.joint_pos[".*_inner_finger_knuckle_joint"] = 0.0
-UR10e_ROBOTIQ_2F_85_CFG.init_state.joint_pos[".*_outer_.*_joint"] = 0.0
-# the major actuator joint for gripper
-UR10e_ROBOTIQ_2F_85_CFG.actuators["gripper_drive"] = ImplicitActuatorCfg(
-    joint_names_expr=["finger_joint"],  # "right_outer_knuckle_joint" is its mimic joint
-    effort_limit_sim=10.0,
-    velocity_limit_sim=1.0,
-    stiffness=11.25,
-    damping=0.1,
-    friction=0.0,
-    armature=0.0,
-)
-# enable the gripper to grasp in a parallel manner
-UR10e_ROBOTIQ_2F_85_CFG.actuators["gripper_finger"] = ImplicitActuatorCfg(
-    joint_names_expr=[".*_inner_finger_joint"],
-    effort_limit_sim=1.0,
-    velocity_limit_sim=1.0,
-    stiffness=0.2,
-    damping=0.001,
-    friction=0.0,
-    armature=0.0,
-)
-# set PD to zero for passive joints in close-loop gripper
-UR10e_ROBOTIQ_2F_85_CFG.actuators["gripper_passive"] = ImplicitActuatorCfg(
-    joint_names_expr=[".*_inner_finger_knuckle_joint", "right_outer_knuckle_joint"],
-    effort_limit_sim=1.0,
-    velocity_limit_sim=1.0,
-    stiffness=0.0,
-    damping=0.0,
-    friction=0.0,
-    armature=0.0,
-)
 
-"""Configuration of UR-10E arm with Robotiq 2F-85 gripper."""
+
+UR7e_with_RG6_Gripper_CFG = ArticulationCfg(
+    spawn = sim_utils.UsdFileCfg(
+        usd_path = f"/home/chotalia.sd@int.pg.com/embodied_ai_repository/usd/ur7e_gripper_flattened_new.usd",
+        rigid_props = sim_utils.RigidBodyPropertiesCfg(
+            disable_gravity = False,
+            max_depenetration_velocity = 5.0,
+        ),
+        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+            enabled_self_collisions=True, solver_position_iteration_count=64, solver_velocity_iteration_count=4
+        ),
+        activate_contact_sensors = False,
+    ),
+    init_state = ArticulationCfg.InitialStateCfg(
+        joint_pos = {
+            "shoulder_pan_joint": 0.0,
+            "shoulder_lift_joint": -1.5707,
+            "elbow_joint": 1.5707,
+            "wrist_1_joint": -1.5707,
+            "wrist_2_joint": -1.5707,
+            "wrist_3_joint": 0.0,
+            "finger_joint": 0.0,
+            ".*_inner_finger_joint": 0.0,
+            ".*_inner_knuckle_joint": 0.0,
+            "right_outer_knuckle_joint": 0.0,
+            
+        },
+        pos = (0.0, 0.0, 0.0),
+        rot = (1.0, 0.0, 0.0, 0.0),
+    ),
+    actuators = {
+        # 'shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint'
+        "shoulder": ImplicitActuatorCfg(
+            joint_names_expr=["shoulder_.*"],
+            stiffness=1000.0,
+            damping=10.0,
+            friction=0.0,
+            armature=0.0,
+        ),
+        "elbow": ImplicitActuatorCfg(
+            joint_names_expr=["elbow_joint"],
+            stiffness=1200.0,
+            damping=120.0,
+            friction=0.0,
+            armature=0.0,
+        ),
+        "wrist": ImplicitActuatorCfg(
+            joint_names_expr=["wrist_.*"],
+            stiffness=461.5,
+            damping=45.0,
+            friction=0.0,
+            armature=0.0,
+        ),
+        "gripper_drive": ImplicitActuatorCfg(
+            joint_names_expr=["finger_joint"],
+            effort_limit_sim=200.0,
+            velocity_limit_sim=1.0,
+            stiffness=200.0,
+            damping=10.0,
+            friction=0.0,
+            armature=0.0,
+        ),
+    }
+)
+#UR7e_with_RG6_Gripper_CFG.spawn.variants = {"Gripper": "Onshape_RG6_Gripper"}
+"""Configuration of UR7e arm with the OnRobot RG6 gripper."""
+
